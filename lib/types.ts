@@ -42,6 +42,7 @@ export interface SubmissionItem {
   vat_rate: number;
   total_price: number;
   unit: string | null;
+  cost_center: string | null;
   sort_order: number;
 }
 

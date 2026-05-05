@@ -33,6 +33,7 @@ export function parseIsdoc(xmlBuffer: Buffer | string): Partial<SubmissionFormDa
     vat_rate: parseFloat(getText(line.ClassifiedTaxCategory?.Percent || line.VATRate)) || 21,
     total_price: parseFloat(getText(line.LineExtensionAmountCurr || line.LineExtensionAmount)) || 0,
     unit: getText(line.InvoicedQuantity?.["$_unitCode"] || ""),
+    cost_center: null,
     sort_order: i,
   }));
 

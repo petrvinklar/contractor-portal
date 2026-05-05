@@ -38,7 +38,7 @@ export default function InvoiceForm({ data, items, onChange, onItemsChange }: In
   const addItem = () => {
     onItemsChange([
       ...items,
-      { description: "", quantity: 1, unit_price: 0, vat_rate: 21, total_price: 0, unit: null, sort_order: items.length },
+      { description: "", quantity: 1, unit_price: 0, vat_rate: 21, total_price: 0, unit: null, cost_center: "", sort_order: items.length },
     ]);
   };
 
@@ -265,6 +265,10 @@ export default function InvoiceForm({ data, items, onChange, onItemsChange }: In
           </button>
         </div>
 
+        <p className="text-sm text-amber-700 bg-amber-50 border border-amber-200 rounded-md px-3 py-2 mb-3">
+          Středisko musí sdělit objednatel. Pokud má faktura více řádků, uveďte středisko u každého.
+        </p>
+
         {items.length === 0 && (
           <p className="text-gray-500 text-sm">Zatím žádné položky. Klikněte na &quot;Přidat položku&quot;.</p>
         )}
@@ -273,7 +277,7 @@ export default function InvoiceForm({ data, items, onChange, onItemsChange }: In
           {items.map((item, i) => (
             <div key={i} className="border rounded-md p-4 bg-gray-50">
               <div className="grid grid-cols-1 md:grid-cols-12 gap-3 items-end">
-                <div className="md:col-span-4">
+                <div className="md:col-span-3">
                   <label className="block text-xs font-medium text-gray-600">Popis *</label>
                   <input
                     type="text"
@@ -283,7 +287,7 @@ export default function InvoiceForm({ data, items, onChange, onItemsChange }: In
                     required
                   />
                 </div>
-                <div className="md:col-span-2">
+                <div className="md:col-span-1">
                   <label className="block text-xs font-medium text-gray-600">Množství</label>
                   <input
                     type="number"
@@ -315,6 +319,16 @@ export default function InvoiceForm({ data, items, onChange, onItemsChange }: In
                     <option value={12}>12%</option>
                     <option value={21}>21%</option>
                   </select>
+                </div>
+                <div className="md:col-span-2">
+                  <label className="block text-xs font-medium text-gray-600">Středisko *</label>
+                  <input
+                    type="text"
+                    value={item.cost_center || ""}
+                    onChange={(e) => updateItem(i, "cost_center", e.target.value)}
+                    className="mt-1 block w-full rounded-md border border-gray-300 px-3 py-2 text-sm shadow-sm focus:border-blue-500 focus:ring-blue-500"
+                    required
+                  />
                 </div>
                 <div className="md:col-span-2">
                   <label className="block text-xs font-medium text-gray-600">Celkem bez DPH</label>
