@@ -46,6 +46,8 @@ export default function NahratPage() {
 
   const [files, setFiles] = useState<UploadedFile[]>([]);
   const [sourceType, setSourceType] = useState<"manual" | "isdoc" | "pdf">("manual");
+  const [isdocRaw, setIsdocRaw] = useState<any>(null);
+  const [triedSubmit, setTriedSubmit] = useState(false);
 
   const fillInvoiceFromData = (data: any) => {
     setInvoice((prev) => ({
@@ -76,6 +78,7 @@ export default function NahratPage() {
 
   const handleIsdocParsed = (data: any) => {
     setSourceType("isdoc");
+    setIsdocRaw(data.isdoc_raw || null);
     fillInvoiceFromData(data);
   };
 
@@ -86,7 +89,20 @@ export default function NahratPage() {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    setTriedSubmit(true);
     setErrors([]);
+
+    // Client-side validation
+    const clientErrors: string[] = [];
+    if (!invoice.supplier_email?.trim()) clientErrors.push("Email je povinný");
+    items.forEach((item, i) => {
+      if (!item.cost_center?.trim()) clientErrors.push(`Položka ${i + 1}: chybí středisko`);
+    });
+    if (clientErrors.length > 0) {
+      setErrors(clientErrors);
+      return;
+    }
+
     setSubmitting(true);
 
     try {
@@ -98,6 +114,7 @@ export default function NahratPage() {
         ...invoice,
         items,
         source_type: sourceType,
+        isdoc_raw: isdocRaw,
         file_ids: files.map((f) => ({
           storage_path: f.storage_path,
           file_name: f.file_name,
@@ -159,6 +176,8 @@ export default function NahratPage() {
                 setItems([{ description: "", quantity: 1, unit_price: 0, vat_rate: 21, total_price: 0, unit: null, cost_center: "", sort_order: 0 }]);
                 setFiles([]);
                 setSourceType("manual");
+                setIsdocRaw(null);
+                setTriedSubmit(false);
               }}
               className="inline-block px-6 py-2 border border-gray-300 rounded-md hover:bg-gray-50"
             >
@@ -202,6 +221,7 @@ export default function NahratPage() {
               items={items}
               onChange={setInvoice}
               onItemsChange={setItems}
+              triedSubmit={triedSubmit}
             />
           </div>
         )}
@@ -234,6 +254,24 @@ export default function NahratPage() {
                   }, 0).toLocaleString("cs-CZ", { minimumFractionDigits: 2 })} {invoice.currency}
                 </p>
               </div>
+            </div>
+
+            {/* Email — required, not in ISDOC data */}
+            <div>
+              <label className="block text-sm font-medium text-gray-700">Váš email *</label>
+              <input
+                type="email"
+                value={invoice.supplier_email}
+                onChange={(e) => setInvoice((prev) => ({ ...prev, supplier_email: e.target.value }))}
+                className={`mt-1 block w-full max-w-md rounded-md border px-3 py-2 shadow-sm focus:border-blue-500 focus:ring-blue-500 ${
+                  triedSubmit && !invoice.supplier_email?.trim() ? "border-red-500 bg-red-50" : "border-gray-300"
+                }`}
+                placeholder="email@firma.cz"
+                required
+              />
+              {triedSubmit && !invoice.supplier_email?.trim() && (
+                <p className="text-red-600 text-xs mt-1">Email je povinný</p>
+              )}
             </div>
 
             {/* Items with cost center */}
@@ -272,9 +310,15 @@ export default function NahratPage() {
                               );
                               setItems(updated);
                             }}
-                            className="block w-full rounded-md border border-gray-300 px-2 py-1 text-sm shadow-sm focus:border-blue-500 focus:ring-blue-500"
+                            className={`block w-full rounded-md border px-2 py-1 text-sm shadow-sm focus:border-blue-500 focus:ring-blue-500 ${
+                              triedSubmit && !item.cost_center?.trim() ? "border-red-500 bg-red-50" : "border-gray-300"
+                            }`}
+                            placeholder="např. 101"
                             required
                           />
+                          {triedSubmit && !item.cost_center?.trim() && (
+                            <p className="text-red-600 text-xs mt-1">Povinné</p>
+                          )}
                         </td>
                       </tr>
                     ))}

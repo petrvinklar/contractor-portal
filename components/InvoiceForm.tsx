@@ -28,9 +28,10 @@ interface InvoiceFormProps {
   items: SubmissionItem[];
   onChange: (data: InvoiceFormData) => void;
   onItemsChange: (items: SubmissionItem[]) => void;
+  triedSubmit?: boolean;
 }
 
-export default function InvoiceForm({ data, items, onChange, onItemsChange }: InvoiceFormProps) {
+export default function InvoiceForm({ data, items, onChange, onItemsChange, triedSubmit = false }: InvoiceFormProps) {
   const update = (field: keyof InvoiceFormData, value: string) => {
     onChange({ ...data, [field]: value });
   };
@@ -118,7 +119,9 @@ export default function InvoiceForm({ data, items, onChange, onItemsChange }: In
               type="text"
               value={data.supplier_name}
               onChange={(e) => update("supplier_name", e.target.value)}
-              className="mt-1 block w-full rounded-md border border-gray-300 px-3 py-2 shadow-sm focus:border-blue-500 focus:ring-blue-500"
+              className={`mt-1 block w-full rounded-md border px-3 py-2 shadow-sm focus:border-blue-500 focus:ring-blue-500 ${
+                triedSubmit && !data.supplier_name?.trim() ? "border-red-500 bg-red-50" : "border-gray-300"
+              }`}
               required
             />
           </div>
@@ -128,7 +131,9 @@ export default function InvoiceForm({ data, items, onChange, onItemsChange }: In
               type="text"
               value={data.supplier_ico}
               onChange={(e) => update("supplier_ico", e.target.value)}
-              className="mt-1 block w-full rounded-md border border-gray-300 px-3 py-2 shadow-sm focus:border-blue-500 focus:ring-blue-500"
+              className={`mt-1 block w-full rounded-md border px-3 py-2 shadow-sm focus:border-blue-500 focus:ring-blue-500 ${
+                triedSubmit && !data.supplier_ico?.trim() ? "border-red-500 bg-red-50" : "border-gray-300"
+              }`}
               required
             />
           </div>
@@ -147,9 +152,14 @@ export default function InvoiceForm({ data, items, onChange, onItemsChange }: In
               type="email"
               value={data.supplier_email}
               onChange={(e) => update("supplier_email", e.target.value)}
-              className="mt-1 block w-full rounded-md border border-gray-300 px-3 py-2 shadow-sm focus:border-blue-500 focus:ring-blue-500"
+              className={`mt-1 block w-full rounded-md border px-3 py-2 shadow-sm focus:border-blue-500 focus:ring-blue-500 ${
+                triedSubmit && !data.supplier_email?.trim() ? "border-red-500 bg-red-50" : "border-gray-300"
+              }`}
               required
             />
+            {triedSubmit && !data.supplier_email?.trim() && (
+              <p className="text-red-600 text-xs mt-1">Povinné</p>
+            )}
           </div>
           <div>
             <label className="block text-sm font-medium text-gray-700">Kontaktní osoba</label>
@@ -326,9 +336,15 @@ export default function InvoiceForm({ data, items, onChange, onItemsChange }: In
                     type="text"
                     value={item.cost_center || ""}
                     onChange={(e) => updateItem(i, "cost_center", e.target.value)}
-                    className="mt-1 block w-full rounded-md border border-gray-300 px-3 py-2 text-sm shadow-sm focus:border-blue-500 focus:ring-blue-500"
+                    className={`mt-1 block w-full rounded-md border px-3 py-2 text-sm shadow-sm focus:border-blue-500 focus:ring-blue-500 ${
+                      triedSubmit && !item.cost_center?.trim() ? "border-red-500 bg-red-50" : "border-gray-300"
+                    }`}
+                    placeholder="např. 101"
                     required
                   />
+                  {triedSubmit && !item.cost_center?.trim() && (
+                    <p className="text-red-600 text-xs mt-1">Povinné</p>
+                  )}
                 </div>
                 <div className="md:col-span-2">
                   <label className="block text-xs font-medium text-gray-600">Celkem bez DPH</label>

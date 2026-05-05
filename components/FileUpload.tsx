@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useCallback, useRef } from "react";
+import { useState, useCallback, useRef, useEffect } from "react";
 
 interface UploadedFile {
   storage_path: string;
@@ -18,6 +18,7 @@ interface FileUploadProps {
 export default function FileUpload({ onFilesUploaded, onIsdocParsed, onPdfParsed }: FileUploadProps) {
   const [uploading, setUploading] = useState(false);
   const [analyzing, setAnalyzing] = useState(false);
+  const [analysisSeconds, setAnalysisSeconds] = useState(0);
   const [files, setFiles] = useState<UploadedFile[]>([]);
   const [dragOver, setDragOver] = useState(false);
   const [error, setError] = useState("");
@@ -67,6 +68,20 @@ export default function FileUpload({ onFilesUploaded, onIsdocParsed, onPdfParsed
       setAnalyzing(false);
     }
   };
+
+  // Timer for AI analysis countdown
+  useEffect(() => {
+    if (!analyzing) {
+      setAnalysisSeconds(0);
+      return;
+    }
+    const interval = setInterval(() => {
+      setAnalysisSeconds((s) => s + 1);
+    }, 1000);
+    return () => clearInterval(interval);
+  }, [analyzing]);
+
+  const estimatedSeconds = 15;
 
   const handleFiles = useCallback(
     async (fileList: FileList) => {
@@ -150,6 +165,19 @@ export default function FileUpload({ onFilesUploaded, onIsdocParsed, onPdfParsed
             <div>
               <p className="text-lg font-medium">Analyzuji PDF...</p>
               <p className="text-sm mt-1">Extrahuji údaje z faktury pomocí AI</p>
+              <div className="mt-3 w-48 mx-auto">
+                <div className="h-2 bg-gray-200 rounded-full overflow-hidden">
+                  <div
+                    className="h-full bg-blue-500 rounded-full transition-all duration-1000"
+                    style={{ width: `${Math.min((analysisSeconds / estimatedSeconds) * 100, 95)}%` }}
+                  />
+                </div>
+                <p className="text-xs text-gray-400 mt-1">
+                  {analysisSeconds < estimatedSeconds
+                    ? `~${estimatedSeconds - analysisSeconds}s`
+                    : "Ještě chvíli..."}
+                </p>
+              </div>
             </div>
           ) : uploading ? (
             <p>Nahrávám...</p>

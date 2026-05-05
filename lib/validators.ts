@@ -16,6 +16,7 @@ export function validateSubmission(data: Partial<SubmissionFormData>): string[] 
     data.items.forEach((item, i) => {
       if (!item.description?.trim()) errors.push(`Položka ${i + 1}: chybí popis`);
       if (!item.unit_price && item.unit_price !== 0) errors.push(`Položka ${i + 1}: chybí cena`);
+      if (!item.cost_center?.trim()) errors.push(`Položka ${i + 1}: chybí středisko`);
     });
   }
 

@@ -38,6 +38,7 @@ export async function POST(req: NextRequest) {
       vat_rate: item.vat_rate ?? 21,
       total_price: Math.round(lineTotal * 100) / 100,
       unit: item.unit || null,
+      cost_center: item.cost_center || null,
       sort_order: i,
     };
   });
@@ -150,7 +151,18 @@ export async function GET(req: NextRequest) {
     .order("created_at", { ascending: false });
 
   if (!isAdmin) {
-    query = query.or(`contractor_id.eq.${user.id},email.eq.${user.email}`);
+    // Look up the user's profile to also match by IČO
+    const { data: profile } = await supabaseAdmin
+      .from("contractor_profiles")
+      .select("ico")
+      .eq("id", user.id)
+      .maybeSingle();
+
+    const filters = [`contractor_id.eq.${user.id}`, `email.eq.${user.email}`];
+    if (profile?.ico) {
+      filters.push(`ico.eq.${profile.ico}`);
+    }
+    query = query.or(filters.join(","));
   }
 
   const status = req.nextUrl.searchParams.get("status");
