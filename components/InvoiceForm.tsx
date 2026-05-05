@@ -12,6 +12,8 @@ interface InvoiceFormData {
   supplier_name: string;
   supplier_ico: string;
   supplier_dic: string;
+  supplier_email: string;
+  supplier_contact: string;
   buyer_name: string;
   buyer_ico: string;
   buyer_dic: string;
@@ -111,21 +113,23 @@ export default function InvoiceForm({ data, items, onChange, onItemsChange }: In
         <h2 className="text-lg font-semibold mb-4">Dodavatel</h2>
         <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
           <div>
-            <label className="block text-sm font-medium text-gray-700">Název</label>
+            <label className="block text-sm font-medium text-gray-700">Název firmy *</label>
             <input
               type="text"
               value={data.supplier_name}
               onChange={(e) => update("supplier_name", e.target.value)}
               className="mt-1 block w-full rounded-md border border-gray-300 px-3 py-2 shadow-sm focus:border-blue-500 focus:ring-blue-500"
+              required
             />
           </div>
           <div>
-            <label className="block text-sm font-medium text-gray-700">IČO</label>
+            <label className="block text-sm font-medium text-gray-700">IČO *</label>
             <input
               type="text"
               value={data.supplier_ico}
               onChange={(e) => update("supplier_ico", e.target.value)}
               className="mt-1 block w-full rounded-md border border-gray-300 px-3 py-2 shadow-sm focus:border-blue-500 focus:ring-blue-500"
+              required
             />
           </div>
           <div>
@@ -134,6 +138,25 @@ export default function InvoiceForm({ data, items, onChange, onItemsChange }: In
               type="text"
               value={data.supplier_dic}
               onChange={(e) => update("supplier_dic", e.target.value)}
+              className="mt-1 block w-full rounded-md border border-gray-300 px-3 py-2 shadow-sm focus:border-blue-500 focus:ring-blue-500"
+            />
+          </div>
+          <div>
+            <label className="block text-sm font-medium text-gray-700">Email *</label>
+            <input
+              type="email"
+              value={data.supplier_email}
+              onChange={(e) => update("supplier_email", e.target.value)}
+              className="mt-1 block w-full rounded-md border border-gray-300 px-3 py-2 shadow-sm focus:border-blue-500 focus:ring-blue-500"
+              required
+            />
+          </div>
+          <div>
+            <label className="block text-sm font-medium text-gray-700">Kontaktní osoba</label>
+            <input
+              type="text"
+              value={data.supplier_contact}
+              onChange={(e) => update("supplier_contact", e.target.value)}
               className="mt-1 block w-full rounded-md border border-gray-300 px-3 py-2 shadow-sm focus:border-blue-500 focus:ring-blue-500"
             />
           </div>

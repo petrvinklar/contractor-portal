@@ -2,7 +2,6 @@
 
 import { useState } from "react";
 import FileUpload from "@/components/FileUpload";
-import ContractorInfo from "@/components/ContractorInfo";
 import InvoiceForm from "@/components/InvoiceForm";
 import { SubmissionItem } from "@/lib/types";
 import Link from "next/link";
@@ -20,13 +19,6 @@ export default function NahratPage() {
   const [submitting, setSubmitting] = useState(false);
   const [errors, setErrors] = useState<string[]>([]);
 
-  const [contractor, setContractor] = useState({
-    company_name: "",
-    ico: "",
-    email: "",
-    contact_person: "",
-  });
-
   const [invoice, setInvoice] = useState({
     invoice_number: "",
     date_issued: "",
@@ -37,6 +29,8 @@ export default function NahratPage() {
     supplier_name: "",
     supplier_ico: "",
     supplier_dic: "",
+    supplier_email: "",
+    supplier_contact: "",
     buyer_name: "",
     buyer_ico: "",
     buyer_dic: "",
@@ -54,17 +48,6 @@ export default function NahratPage() {
   const [sourceType, setSourceType] = useState<"manual" | "isdoc" | "pdf">("manual");
 
   const fillInvoiceFromData = (data: any) => {
-    // Auto-fill contractor info
-    if (data.supplier_name || data.company_name || data.ico || data.email) {
-      setContractor((prev) => ({
-        ...prev,
-        company_name: data.supplier_name || data.company_name || prev.company_name,
-        ico: data.supplier_ico || data.ico || prev.ico,
-        email: data.email || prev.email,
-        contact_person: data.contact_person || prev.contact_person,
-      }));
-    }
-    // Auto-fill invoice data
     setInvoice((prev) => ({
       ...prev,
       invoice_number: data.invoice_number || prev.invoice_number,
@@ -73,9 +56,11 @@ export default function NahratPage() {
       date_taxable: data.date_taxable || prev.date_taxable,
       currency: data.currency || prev.currency,
       description: data.description || prev.description,
-      supplier_name: data.supplier_name || prev.supplier_name,
-      supplier_ico: data.supplier_ico || prev.supplier_ico,
+      supplier_name: data.supplier_name || data.company_name || prev.supplier_name,
+      supplier_ico: data.supplier_ico || data.ico || prev.supplier_ico,
       supplier_dic: data.supplier_dic || prev.supplier_dic,
+      supplier_email: data.email || prev.supplier_email,
+      supplier_contact: data.contact_person || prev.supplier_contact,
       buyer_name: data.buyer_name || prev.buyer_name,
       buyer_ico: data.buyer_ico || prev.buyer_ico,
       buyer_dic: data.buyer_dic || prev.buyer_dic,
@@ -84,7 +69,6 @@ export default function NahratPage() {
       iban: data.iban || prev.iban,
       variable_symbol: data.variable_symbol || prev.variable_symbol,
     }));
-    // Auto-fill items
     if (data.items && data.items.length > 0) {
       setItems(data.items);
     }
@@ -107,7 +91,10 @@ export default function NahratPage() {
 
     try {
       const body = {
-        ...contractor,
+        company_name: invoice.supplier_name,
+        ico: invoice.supplier_ico,
+        email: invoice.supplier_email,
+        contact_person: invoice.supplier_contact,
         ...invoice,
         items,
         source_type: sourceType,
@@ -162,11 +149,11 @@ export default function NahratPage() {
             <button
               onClick={() => {
                 setStep("form");
-                setContractor({ company_name: "", ico: "", email: "", contact_person: "" });
                 setInvoice({
                   invoice_number: "", date_issued: "", date_due: "", date_taxable: "",
                   currency: "CZK", description: "", supplier_name: "", supplier_ico: "",
-                  supplier_dic: "", buyer_name: "", buyer_ico: "", buyer_dic: "",
+                  supplier_dic: "", supplier_email: "", supplier_contact: "",
+                  buyer_name: "", buyer_ico: "", buyer_dic: "",
                   bank_account: "", bank_code: "", iban: "", variable_symbol: "",
                 });
                 setItems([{ description: "", quantity: 1, unit_price: 0, vat_rate: 21, total_price: 0, unit: null, sort_order: 0 }]);
@@ -207,12 +194,7 @@ export default function NahratPage() {
           />
         </div>
 
-        {/* Krok 2: Identifikace dodavatele */}
-        <div className="bg-white rounded-lg border p-6">
-          <ContractorInfo data={contractor} onChange={setContractor} />
-        </div>
-
-        {/* Krok 3: Údaje faktury */}
+        {/* Krok 2: Údaje faktury */}
         <div className="bg-white rounded-lg border p-6">
           <InvoiceForm
             data={invoice}
