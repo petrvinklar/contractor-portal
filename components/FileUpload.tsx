@@ -142,7 +142,6 @@ export default function FileUpload({ onFilesUploaded, onIsdocParsed, onPdfParsed
           ref={inputRef}
           type="file"
           className="hidden"
-          accept=".pdf,.xml,.isdoc,application/pdf,text/xml,application/xml,application/octet-stream"
           multiple
           onChange={(e) => e.target.files && handleFiles(e.target.files)}
         />
