@@ -9,7 +9,6 @@
     "lint": "next lint"
   },
   "dependencies": {
-    "@deltazero/isdoc": "^0.1.2",
     "@supabase/ssr": "^0.10.2",
     "@supabase/supabase-js": "^2.105.1",
     "fast-xml-parser": "^5.7.2",
