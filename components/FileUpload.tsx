@@ -40,14 +40,21 @@ export default function FileUpload({ onFilesUploaded, onIsdocParsed, onPdfParsed
     const formData = new FormData();
     formData.append("file", file);
 
-    const res = await fetch("/api/parse-isdoc", { method: "POST", body: formData });
-    if (!res.ok) {
-      const err = await res.json();
-      console.error("ISDOC parse error:", err.error);
-      return;
+    try {
+      const res = await fetch("/api/parse-isdoc", { method: "POST", body: formData });
+      if (!res.ok) {
+        const err = await res.json();
+        setError(err.error || "Parsování ISDOC selhalo — vyplňte údaje ručně");
+        // Fall back to PDF flow (full form) for manual entry
+        onPdfParsed?.({});
+        return;
+      }
+      const data = await res.json();
+      onIsdocParsed?.(data);
+    } catch {
+      setError("Parsování ISDOC selhalo — vyplňte údaje ručně");
+      onPdfParsed?.({});
     }
-    const data = await res.json();
-    onIsdocParsed?.(data);
   };
 
   const parsePdf = async (file: File) => {
@@ -59,11 +66,16 @@ export default function FileUpload({ onFilesUploaded, onIsdocParsed, onPdfParsed
       const res = await fetch("/api/parse-pdf", { method: "POST", body: formData });
       if (!res.ok) {
         const err = await res.json();
-        console.error("PDF parse error:", err.error);
+        setError(err.error || "Analýza PDF selhala — vyplňte údaje ručně");
+        // Still show the form for manual entry
+        onPdfParsed?.({});
         return;
       }
       const data = await res.json();
       onPdfParsed?.(data);
+    } catch {
+      setError("Analýza PDF selhala — vyplňte údaje ručně");
+      onPdfParsed?.({});
     } finally {
       setAnalyzing(false);
     }
@@ -81,7 +93,7 @@ export default function FileUpload({ onFilesUploaded, onIsdocParsed, onPdfParsed
     return () => clearInterval(interval);
   }, [analyzing]);
 
-  const estimatedSeconds = 15;
+  const estimatedSeconds = 30;
 
   const handleFiles = useCallback(
     async (fileList: FileList) => {

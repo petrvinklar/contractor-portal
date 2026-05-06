@@ -153,6 +153,7 @@ Pravidla:
         vat_rate: Number(item.vat_rate) || 21,
         total_price: Number(item.total_price) || 0,
         unit: item.unit || null,
+        cost_center: null,
         sort_order: i,
       }));
     }
