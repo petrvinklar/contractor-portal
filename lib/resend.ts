@@ -22,9 +22,19 @@ Fakturační portál`,
   });
 }
 
-export async function sendAdminNotification(submissionId: string, companyName: string, ico: string, amount: string) {
+export async function sendAdminNotification(
+  submissionId: string,
+  companyName: string,
+  ico: string,
+  amount: string,
+  isdocXml?: string,
+  invoiceNumber?: string,
+) {
   if (ADMIN_EMAILS.length === 0) return;
   const appUrl = process.env.NEXT_PUBLIC_APP_URL || "http://localhost:3001";
+  const attachments = isdocXml
+    ? [{ filename: `${invoiceNumber || submissionId.slice(0, 8)}.isdoc`, content: Buffer.from(isdocXml, "utf-8") }]
+    : undefined;
   await resend.emails.send({
     from: "Fakturační portál <onboarding@resend.dev>",
     to: ADMIN_EMAILS,
@@ -36,6 +46,7 @@ IČO: ${ico}
 Částka: ${amount}
 
 Detail: ${appUrl}/admin/${submissionId}`,
+    attachments,
   });
 }
 

@@ -3,6 +3,7 @@ import { supabaseAdmin } from "@/lib/supabase-admin";
 import { createSupabaseServer } from "@/lib/supabase-server";
 import { validateSubmission } from "@/lib/validators";
 import { sendContractorConfirmation, sendAdminNotification } from "@/lib/resend";
+import { generateIsdocXml } from "@/lib/isdoc-generator";
 import { SubmissionFormData } from "@/lib/types";
 
 const ADMIN_EMAILS = (process.env.ADMIN_EMAILS || "").split(",").map((e) => e.trim()).filter(Boolean);
@@ -122,13 +123,55 @@ export async function POST(req: NextRequest) {
     }
   }
 
+  // Generate ISDOC XML for admin email attachment
+  const finalTotalAmount = body.total_amount ?? totalAmount;
+  const finalTotalWithoutVat = body.total_without_vat ?? totalWithoutVat;
+  const invoiceNumber = body.invoice_number || null;
+  let isdocXml: string | undefined;
+  try {
+    isdocXml = generateIsdocXml(
+      {
+        id: submission.id,
+        invoice_number: invoiceNumber,
+        date_issued: body.date_issued || null,
+        date_due: body.date_due || null,
+        date_taxable: body.date_taxable || null,
+        total_amount: finalTotalAmount,
+        total_without_vat: finalTotalWithoutVat,
+        currency: body.currency || "CZK",
+        supplier_name: body.supplier_name || null,
+        supplier_ico: body.supplier_ico || null,
+        supplier_dic: body.supplier_dic || null,
+        buyer_name: body.buyer_name || null,
+        buyer_ico: body.buyer_ico || null,
+        buyer_dic: body.buyer_dic || null,
+        bank_account: body.bank_account || null,
+        bank_code: body.bank_code || null,
+        iban: body.iban || null,
+        variable_symbol: body.variable_symbol || null,
+      },
+      items.map((item) => ({
+        description: item.description,
+        quantity: item.quantity,
+        unit_price: item.unit_price,
+        vat_rate: item.vat_rate,
+        total_price: item.total_price,
+        unit: item.unit,
+      })),
+    );
+  } catch (e) {
+    console.error("ISDOC generation error:", e);
+  }
+
   // Send emails (non-blocking)
   sendContractorConfirmation(body.email, submission.id, body.company_name).catch(console.error);
   sendAdminNotification(
     submission.id,
     body.company_name,
     body.ico,
-    `${totalAmount} ${body.currency || "CZK"}`
+    `${finalTotalAmount} ${body.currency || "CZK"}`,
+    isdocXml,
+    invoiceNumber || undefined,
   ).catch(console.error);
 
   return NextResponse.json({ id: submission.id }, { status: 201 });
