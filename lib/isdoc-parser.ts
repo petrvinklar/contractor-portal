@@ -26,16 +26,24 @@ export function parseIsdoc(xmlBuffer: Buffer | string): Partial<SubmissionFormDa
   // Parse items
   const rawLines = inv.InvoiceLines?.InvoiceLine;
   const lines = Array.isArray(rawLines) ? rawLines : rawLines ? [rawLines] : [];
-  const items: SubmissionItem[] = lines.map((line: any, i: number) => ({
-    description: getText(line.Item?.Description || line.Note || ""),
-    quantity: parseFloat(getText(line.InvoicedQuantity)) || 1,
-    unit_price: parseFloat(getText(line.UnitPrice || line.UnitPriceWithoutVAT)) || 0,
-    vat_rate: parseFloat(getText(line.ClassifiedTaxCategory?.Percent || line.VATRate)) || 21,
-    total_price: parseFloat(getText(line.LineExtensionAmountCurr || line.LineExtensionAmount)) || 0,
-    unit: getText(line.InvoicedQuantity?.["$_unitCode"] || ""),
-    cost_center: null,
-    sort_order: i,
-  }));
+  const items: SubmissionItem[] = lines.map((line: any, i: number) => {
+    const qty = parseFloat(getText(line.InvoicedQuantity)) || 1;
+    const lineAmount = parseFloat(getText(line.LineExtensionAmount)) || 0;
+    const rawUnitPrice = parseFloat(getText(line.UnitPrice || line.UnitPriceWithoutVAT));
+    const unitPrice = !isNaN(rawUnitPrice) && rawUnitPrice > 0
+      ? rawUnitPrice
+      : qty > 0 ? Math.round(lineAmount / qty * 100) / 100 : 0;
+    return {
+      description: getText(line.Item?.Description || line.Note || ""),
+      quantity: qty,
+      unit_price: unitPrice,
+      vat_rate: parseFloat(getText(line.ClassifiedTaxCategory?.Percent || line.VATRate)) || 21,
+      total_price: Math.round(qty * unitPrice * 100) / 100,
+      unit: getText(line.InvoicedQuantity?.["$_unitCode"] || ""),
+      cost_center: null,
+      sort_order: i,
+    };
+  });
 
   // Extract bank info
   const bankAccount = getText(payment?.Details?.ID || "");
