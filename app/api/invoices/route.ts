@@ -157,6 +157,7 @@ export async function POST(req: NextRequest) {
         vat_rate: item.vat_rate,
         total_price: item.total_price,
         unit: item.unit,
+        cost_center: item.cost_center,
       })),
     );
   } catch (e) {

@@ -28,6 +28,7 @@ interface IsdocItem {
   vat_rate: number;
   total_price: number;
   unit: string | null;
+  cost_center: string | null;
 }
 
 const builder = new XMLBuilder({
@@ -81,6 +82,7 @@ export function generateIsdocXml(submission: IsdocSubmission, items: IsdocItem[]
         Percent: item.vat_rate,
         VATCalculationMethod: 0,
       },
+      ...(item.cost_center ? { Note: `Středisko: ${item.cost_center}` } : {}),
       Item: {
         Description: item.description,
       },
