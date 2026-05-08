@@ -60,6 +60,7 @@ export function parseIsdoc(xmlBuffer: Buffer | string): Partial<SubmissionFormDa
     supplier_name: getText(supplier?.PartyIdentification?.ID ? supplier?.PartyName?.Name : supplier?.PartyName?.Name || ""),
     supplier_ico: getText(supplier?.PartyIdentification?.ID || ""),
     supplier_dic: getText(supplier?.PartyTaxScheme?.CompanyID || ""),
+    email: getText(supplier?.Contact?.ElectronicMail || ""),
     buyer_name: getText(customer?.PartyName?.Name || ""),
     buyer_ico: getText(customer?.PartyIdentification?.ID || ""),
     buyer_dic: getText(customer?.PartyTaxScheme?.CompanyID || ""),
