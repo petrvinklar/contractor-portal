@@ -213,8 +213,8 @@ export default function NahratPage() {
           />
         </div>
 
-        {/* PDF flow: full editable form */}
-        {sourceType === "pdf" && (
+        {/* PDF / ISDOC flow: full editable form */}
+        {(sourceType === "pdf" || sourceType === "isdoc") && (
           <div className="bg-white rounded-lg border p-6">
             <InvoiceForm
               data={invoice}
@@ -223,109 +223,6 @@ export default function NahratPage() {
               onItemsChange={setItems}
               triedSubmit={triedSubmit}
             />
-          </div>
-        )}
-
-        {/* ISDOC flow: compact summary + cost center fields */}
-        {sourceType === "isdoc" && (
-          <div className="bg-white rounded-lg border p-6 space-y-6">
-            <h2 className="text-lg font-semibold">Shrnutí faktury</h2>
-            <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-              <div>
-                <p className="text-xs text-gray-500">Dodavatel</p>
-                <p className="font-medium">{invoice.supplier_name || "—"}</p>
-                <p className="text-sm text-gray-600">{invoice.supplier_ico ? `IČO: ${invoice.supplier_ico}` : ""}</p>
-              </div>
-              <div>
-                <p className="text-xs text-gray-500">Číslo faktury</p>
-                <p className="font-medium">{invoice.invoice_number || "—"}</p>
-              </div>
-              <div>
-                <p className="text-xs text-gray-500">Datum splatnosti</p>
-                <p className="font-medium">{invoice.date_due || "—"}</p>
-              </div>
-              <div>
-                <p className="text-xs text-gray-500">Celková částka</p>
-                <p className="font-medium">
-                  {items.reduce((sum, item) => {
-                    const withoutVat = item.total_price || 0;
-                    const vat = withoutVat * ((item.vat_rate || 0) / 100);
-                    return sum + withoutVat + vat;
-                  }, 0).toLocaleString("cs-CZ", { minimumFractionDigits: 2 })} {invoice.currency}
-                </p>
-              </div>
-            </div>
-
-            {/* Email — required, not in ISDOC data */}
-            <div>
-              <label className="block text-sm font-medium text-gray-700">Váš email *</label>
-              <input
-                type="email"
-                value={invoice.supplier_email}
-                onChange={(e) => setInvoice((prev) => ({ ...prev, supplier_email: e.target.value }))}
-                className={`mt-1 block w-full max-w-md rounded-md border px-3 py-2 shadow-sm focus:border-blue-500 focus:ring-blue-500 ${
-                  triedSubmit && !invoice.supplier_email?.trim() ? "border-red-500 bg-red-50" : "border-gray-300"
-                }`}
-                placeholder="email@firma.cz"
-                required
-              />
-              {triedSubmit && !invoice.supplier_email?.trim() && (
-                <p className="text-red-600 text-xs mt-1">Email je povinný</p>
-              )}
-            </div>
-
-            {/* Items with cost center */}
-            <div>
-              <h3 className="text-md font-semibold mb-2">Položky</h3>
-              <p className="text-sm text-amber-700 bg-amber-50 border border-amber-200 rounded-md px-3 py-2 mb-3">
-                Středisko musí sdělit objednatel. Pokud má faktura více řádků, uveďte středisko u každého.
-              </p>
-              <div className="border rounded-md overflow-hidden">
-                <table className="w-full text-sm">
-                  <thead className="bg-gray-50">
-                    <tr>
-                      <th className="text-left px-3 py-2 font-medium text-gray-600">Popis</th>
-                      <th className="text-right px-3 py-2 font-medium text-gray-600">Množství</th>
-                      <th className="text-right px-3 py-2 font-medium text-gray-600">Cena/ks</th>
-                      <th className="text-right px-3 py-2 font-medium text-gray-600">DPH</th>
-                      <th className="text-right px-3 py-2 font-medium text-gray-600">Celkem</th>
-                      <th className="text-left px-3 py-2 font-medium text-gray-600">Středisko *</th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    {items.map((item, i) => (
-                      <tr key={i} className="border-t">
-                        <td className="px-3 py-2">{item.description || "—"}</td>
-                        <td className="px-3 py-2 text-right">{item.quantity}</td>
-                        <td className="px-3 py-2 text-right">{item.unit_price.toLocaleString("cs-CZ", { minimumFractionDigits: 2 })}</td>
-                        <td className="px-3 py-2 text-right">{item.vat_rate}%</td>
-                        <td className="px-3 py-2 text-right">{item.total_price.toLocaleString("cs-CZ", { minimumFractionDigits: 2 })}</td>
-                        <td className="px-3 py-2">
-                          <input
-                            type="text"
-                            value={item.cost_center || ""}
-                            onChange={(e) => {
-                              const updated = items.map((it, j) =>
-                                j === i ? { ...it, cost_center: e.target.value } : it
-                              );
-                              setItems(updated);
-                            }}
-                            className={`block w-full rounded-md border px-2 py-1 text-sm shadow-sm focus:border-blue-500 focus:ring-blue-500 ${
-                              triedSubmit && !item.cost_center?.trim() ? "border-red-500 bg-red-50" : "border-gray-300"
-                            }`}
-                            placeholder="např. 101"
-                            required
-                          />
-                          {triedSubmit && !item.cost_center?.trim() && (
-                            <p className="text-red-600 text-xs mt-1">Povinné</p>
-                          )}
-                        </td>
-                      </tr>
-                    ))}
-                  </tbody>
-                </table>
-              </div>
-            </div>
           </div>
         )}
 
