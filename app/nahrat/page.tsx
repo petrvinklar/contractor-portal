@@ -72,7 +72,10 @@ export default function NahratPage() {
       variable_symbol: data.variable_symbol || prev.variable_symbol,
     }));
     if (data.items && data.items.length > 0) {
-      setItems(data.items);
+      setItems(data.items.map((item: any) => ({
+        ...item,
+        total_price: Math.round((item.quantity || 1) * (item.unit_price || 0) * 100) / 100,
+      })));
     }
   };
 

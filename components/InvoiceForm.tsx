@@ -58,9 +58,12 @@ export default function InvoiceForm({ data, items, onChange, onItemsChange, trie
     onItemsChange(items.filter((_, i) => i !== index));
   };
 
-  const totalWithoutVat = items.reduce((sum, item) => sum + (item.total_price || 0), 0);
+  const computeLineTotal = (item: SubmissionItem) =>
+    Math.round((item.quantity || 1) * (item.unit_price || 0) * 100) / 100;
+
+  const totalWithoutVat = items.reduce((sum, item) => sum + computeLineTotal(item), 0);
   const totalVat = items.reduce((sum, item) => {
-    return sum + (item.total_price || 0) * ((item.vat_rate || 0) / 100);
+    return sum + computeLineTotal(item) * ((item.vat_rate || 0) / 100);
   }, 0);
   const totalWithVat = totalWithoutVat + totalVat;
 
@@ -349,7 +352,7 @@ export default function InvoiceForm({ data, items, onChange, onItemsChange, trie
                 <div className="md:col-span-2">
                   <label className="block text-xs font-medium text-gray-600">Celkem bez DPH</label>
                   <div className="mt-1 px-3 py-2 bg-white border border-gray-200 rounded-md text-sm text-gray-700">
-                    {item.total_price.toLocaleString("cs-CZ", { minimumFractionDigits: 2 })}
+                    {computeLineTotal(item).toLocaleString("cs-CZ", { minimumFractionDigits: 2 })}
                   </div>
                 </div>
                 <div className="md:col-span-1">
