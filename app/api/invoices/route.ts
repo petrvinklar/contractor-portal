@@ -142,6 +142,7 @@ export async function POST(req: NextRequest) {
         supplier_name: body.supplier_name || null,
         supplier_ico: body.supplier_ico || null,
         supplier_dic: body.supplier_dic || null,
+        supplier_email: body.email || null,
         buyer_name: body.buyer_name || null,
         buyer_ico: body.buyer_ico || null,
         buyer_dic: body.buyer_dic || null,

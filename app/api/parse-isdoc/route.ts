@@ -1,5 +1,15 @@
 import { NextRequest, NextResponse } from "next/server";
 import { parseIsdoc } from "@/lib/isdoc-parser";
+import AdmZip from "adm-zip";
+
+function extractIsdocFromZip(buffer: Buffer): Buffer {
+  const zip = new AdmZip(buffer);
+  const entry = zip.getEntries().find((e) => e.entryName.endsWith(".isdoc"));
+  if (!entry) {
+    throw new Error("ISDOCX archiv neobsahuje .isdoc soubor");
+  }
+  return entry.getData();
+}
 
 export async function POST(req: NextRequest) {
   const formData = await req.formData();
@@ -10,7 +20,12 @@ export async function POST(req: NextRequest) {
   }
 
   try {
-    const buffer = Buffer.from(await file.arrayBuffer());
+    const raw = Buffer.from(await file.arrayBuffer());
+
+    // ISDOCX is a ZIP containing the .isdoc XML (PK magic bytes)
+    const isZip = file.name.endsWith(".isdocx") || (raw[0] === 0x50 && raw[1] === 0x4b);
+    const buffer = isZip ? extractIsdocFromZip(raw) : raw;
+
     const data = parseIsdoc(buffer);
     return NextResponse.json(data);
   } catch (err: any) {

@@ -103,7 +103,7 @@ export default function FileUpload({ onFilesUploaded, onIsdocParsed, onPdfParsed
       try {
         const newFiles: UploadedFile[] = [];
         for (const file of Array.from(fileList)) {
-          const isXml = file.name.endsWith(".isdoc") || file.name.endsWith(".xml") || file.type.includes("xml");
+          const isXml = file.name.endsWith(".isdoc") || file.name.endsWith(".isdocx") || file.name.endsWith(".xml") || file.type.includes("xml");
           const isPdf = file.name.endsWith(".pdf") || file.type === "application/pdf";
 
           if (isXml && onIsdocParsed) {

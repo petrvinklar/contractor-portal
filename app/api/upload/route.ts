@@ -11,11 +11,11 @@ export async function POST(req: NextRequest) {
   }
 
   const allowedTypes = ["application/pdf", "text/xml", "application/xml", "application/octet-stream"];
-  const allowedExtensions = [".pdf", ".xml", ".isdoc"];
+  const allowedExtensions = [".pdf", ".xml", ".isdoc", ".isdocx"];
   const ext = file.name.toLowerCase().split(".").pop() || "";
   if (!allowedTypes.includes(file.type) && !allowedExtensions.includes(`.${ext}`)) {
     return NextResponse.json(
-      { error: "Povolené formáty: PDF, ISDOC, XML" },
+      { error: "Povolené formáty: PDF, ISDOC, ISDOCX, XML" },
       { status: 400 }
     );
   }

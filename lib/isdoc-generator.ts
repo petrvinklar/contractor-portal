@@ -12,6 +12,7 @@ interface IsdocSubmission {
   supplier_name: string | null;
   supplier_ico: string | null;
   supplier_dic: string | null;
+  supplier_email: string | null;
   buyer_name: string | null;
   buyer_ico: string | null;
   buyer_dic: string | null;
@@ -42,7 +43,7 @@ function today(): string {
   return new Date().toISOString().slice(0, 10);
 }
 
-function buildParty(name: string | null, ico: string | null, dic: string | null) {
+function buildParty(name: string | null, ico: string | null, dic: string | null, email?: string | null) {
   return {
     Party: {
       PartyIdentification: { ID: ico || "" },
@@ -55,6 +56,7 @@ function buildParty(name: string | null, ico: string | null, dic: string | null)
         Country: { IdentificationCode: "CZ", Name: "Česká republika" },
       },
       ...(dic ? { PartyTaxScheme: { CompanyID: dic, TaxScheme: "VAT" } } : {}),
+      ...(email ? { Contact: { ElectronicMail: email } } : {}),
     },
   };
 }
@@ -132,7 +134,7 @@ export function generateIsdocXml(submission: IsdocSubmission, items: IsdocItem[]
       LocalCurrencyCode: submission.currency || "CZK",
       CurrRate: 1,
       RefCurrRate: 1,
-      AccountingSupplierParty: buildParty(submission.supplier_name, submission.supplier_ico, submission.supplier_dic),
+      AccountingSupplierParty: buildParty(submission.supplier_name, submission.supplier_ico, submission.supplier_dic, submission.supplier_email),
       AccountingCustomerParty: buildParty(submission.buyer_name, submission.buyer_ico, submission.buyer_dic),
       InvoiceLines: {
         InvoiceLine: invoiceLines,
