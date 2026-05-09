@@ -30,9 +30,22 @@ export async function GET(
     return NextResponse.json({ error: "Nenalezeno" }, { status: 404 });
   }
 
-  // Check access
-  if (!isAdmin && submission.contractor_id !== user.id && submission.email !== user.email) {
-    return NextResponse.json({ error: "Přístup odepřen" }, { status: 403 });
+  // Check access: match by contractor_id, email, or ICO (same as list endpoint)
+  if (!isAdmin) {
+    const { data: profile } = await supabaseAdmin
+      .from("contractor_profiles")
+      .select("ico")
+      .eq("id", user.id)
+      .maybeSingle();
+
+    const hasAccess =
+      submission.contractor_id === user.id ||
+      submission.email === user.email ||
+      (profile?.ico && submission.ico === profile.ico);
+
+    if (!hasAccess) {
+      return NextResponse.json({ error: "Přístup odepřen" }, { status: 403 });
+    }
   }
 
   // Load items and files

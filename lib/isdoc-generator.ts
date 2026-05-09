@@ -156,6 +156,7 @@ export function generateIsdocXml(submission: IsdocSubmission, items: IsdocItem[]
       },
       PaymentMeans: {
         Payment: {
+          Name: "Bankovní převod",
           PaidAmount: totalAmount,
           PaymentMeansCode: 42,
           Details: paymentDetails,

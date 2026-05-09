@@ -57,6 +57,7 @@ CREATE TABLE IF NOT EXISTS contractor_submission_items (
   vat_rate NUMERIC(5,2) DEFAULT 21,
   total_price NUMERIC(15,2),
   unit TEXT,
+  cost_center TEXT,
   sort_order INT DEFAULT 0
 );
 
