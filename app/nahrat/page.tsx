@@ -1,9 +1,10 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import FileUpload from "@/components/FileUpload";
 import InvoiceForm from "@/components/InvoiceForm";
 import { SubmissionItem } from "@/lib/types";
+import { createSupabaseBrowser } from "@/lib/supabase-browser";
 import Link from "next/link";
 
 interface UploadedFile {
@@ -48,6 +49,16 @@ export default function NahratPage() {
   const [sourceType, setSourceType] = useState<"manual" | "isdoc" | "pdf">("manual");
   const [isdocRaw, setIsdocRaw] = useState<any>(null);
   const [triedSubmit, setTriedSubmit] = useState(false);
+  const [isLoggedIn, setIsLoggedIn] = useState(false);
+
+  useEffect(() => {
+    const checkAuth = async () => {
+      const supabase = createSupabaseBrowser();
+      const { data: { user } } = await supabase.auth.getUser();
+      setIsLoggedIn(!!user);
+    };
+    checkAuth();
+  }, []);
 
   const fillInvoiceFromData = (data: any) => {
     setInvoice((prev) => ({
@@ -160,12 +171,21 @@ export default function NahratPage() {
             Na Váš email jsme zaslali potvrzení o přijetí faktury.
           </p>
           <div className="space-x-4">
-            <Link
-              href="/registrace"
-              className="inline-block px-6 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700"
-            >
-              Vytvořit účet pro sledování
-            </Link>
+            {isLoggedIn ? (
+              <Link
+                href="/ucet"
+                className="inline-block px-6 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700"
+              >
+                Přehled odeslaných faktur
+              </Link>
+            ) : (
+              <Link
+                href="/registrace"
+                className="inline-block px-6 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700"
+              >
+                Vytvořit účet pro sledování
+              </Link>
+            )}
             <button
               onClick={() => {
                 setStep("form");
