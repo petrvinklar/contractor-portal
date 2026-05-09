@@ -10,6 +10,7 @@ import { useRouter } from "next/navigation";
 export default function UcetPage() {
   const [submissions, setSubmissions] = useState<ContractorSubmission[]>([]);
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState("");
   const [userEmail, setUserEmail] = useState("");
   const router = useRouter();
 
@@ -27,6 +28,9 @@ export default function UcetPage() {
       if (res.ok) {
         const data = await res.json();
         setSubmissions(data);
+      } else {
+        const err = await res.json().catch(() => ({}));
+        setError(err.error || `Chyba ${res.status}`);
       }
       setLoading(false);
     };
@@ -67,7 +71,13 @@ export default function UcetPage() {
         </div>
       </div>
 
-      {submissions.length === 0 ? (
+      {error && (
+        <div className="bg-red-50 border border-red-200 rounded-md p-4 mb-4">
+          <p className="text-red-700 text-sm">{error}</p>
+        </div>
+      )}
+
+      {!error && submissions.length === 0 ? (
         <div className="bg-gray-50 rounded-lg p-8 text-center text-gray-500">
           <p>Zatím nemáte žádné nahrané faktury.</p>
           <Link href="/nahrat" className="text-blue-600 hover:underline mt-2 inline-block">

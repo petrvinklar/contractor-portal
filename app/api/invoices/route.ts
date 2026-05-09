@@ -49,12 +49,23 @@ export async function POST(req: NextRequest) {
 
   // Try to link to existing contractor
   let contractorId: string | null = null;
-  const { data: profile } = await supabaseAdmin
-    .from("contractor_profiles")
-    .select("id")
-    .eq("ico", body.ico)
-    .maybeSingle();
-  if (profile) contractorId = profile.id;
+
+  // First check if the submitting user is logged in
+  const supabase = createSupabaseServer();
+  const { data: { user: submittingUser } } = await supabase.auth.getUser();
+  if (submittingUser) {
+    contractorId = submittingUser.id;
+  }
+
+  // Also try to link by ICO if not already linked
+  if (!contractorId) {
+    const { data: profile } = await supabaseAdmin
+      .from("contractor_profiles")
+      .select("id")
+      .eq("ico", body.ico)
+      .maybeSingle();
+    if (profile) contractorId = profile.id;
+  }
 
   // Insert submission
   const { data: submission, error: insertErr } = await supabaseAdmin
